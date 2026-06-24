@@ -1,6 +1,7 @@
 name: cann-samples Issue Report
 
 # 手动触发：在仓库 Actions 页面点 "Run workflow"
+# 定时触发：每天北京时间 09:00 / 14:00 / 18:00（GitHub cron 用 UTC，对应 01:00 / 06:00 / 10:00）
 on:
   workflow_dispatch:
     inputs:
@@ -8,6 +9,10 @@ on:
         description: "GitCode 仓库 (owner/repo)"
         required: false
         default: "cann/cann-samples"
+  schedule:
+    - cron: "0 1 * * *"    # 09:00 Asia/Shanghai
+    - cron: "0 6 * * *"    # 14:00 Asia/Shanghai
+    - cron: "0 10 * * *"   # 18:00 Asia/Shanghai
 
 permissions:
   contents: write   # 允许把生成的报告 commit & push 回仓库
@@ -28,7 +33,7 @@ jobs:
         id: gen
         env:
           GITCODE_TOKEN: ${{ secrets.GITCODE_TOKEN }}
-        run: python3 scripts/gen_issue_report.py "${{ inputs.repo }}"
+        run: python3 scripts/gen_issue_report.py "${{ inputs.repo || 'cann/cann-samples' }}"
 
       - name: Commit & push report
         run: |
