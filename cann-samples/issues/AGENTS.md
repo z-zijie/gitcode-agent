@@ -35,20 +35,20 @@
 ## GitCode REST API v5 使用方法
 
 - **Base URL**：`https://gitcode.com/api/v5`
-- **认证**：读操作（GET）一般免认证；写操作需 `-H "Authorization: Bearer $TOKEN"`。
-  也可用 `-H "PRIVATE-TOKEN: $TOKEN"` 或 query 参数 `?access_token=$TOKEN`。
+- **认证**：读操作（GET）一般免认证；写操作需 `-H "Authorization: Bearer $GITCODE_TOKEN"`。
+  也可用 `-H "PRIVATE-TOKEN: $GITCODE_TOKEN"` 或 query 参数 `?access_token=$GITCODE_TOKEN`。
 - **限流**：400 次/分钟、4000 次/小时，超限返回 `429`，需退避重试。
 - **稳健性**：curl 务必加 `--max-time`（如 30s）防止个别请求挂起拖垮整个分页循环。
 
 ### 拉取 Open Issue（分页）
 
 ```bash
-export TOKEN=<your_token>
+export GITCODE_TOKEN=<your_token>
 
 # 单页：state=open，每页最多 100，按创建时间倒序
 curl -s --max-time 30 \
   "https://gitcode.com/api/v5/repos/cann/cann-samples/issues?state=open&per_page=100&page=1&sort=created&direction=desc" \
-  -H "Authorization: Bearer $TOKEN"
+  -H "Authorization: Bearer $GITCODE_TOKEN"
 ```
 
 分页逻辑：从 `page=1` 起循环，单页返回 `< 100` 条即为最后一页；`= 0` 条停止。
@@ -70,21 +70,21 @@ curl -s --max-time 30 \
 ```bash
 # 获取单个 Issue
 curl -s "https://gitcode.com/api/v5/repos/cann/cann-samples/issues/{number}" \
-  -H "Authorization: Bearer $TOKEN"
+  -H "Authorization: Bearer $GITCODE_TOKEN"
 
 # 创建 Issue（注意：实际可用路径含 {repo}）
 curl -s -X POST "https://gitcode.com/api/v5/repos/cann/cann-samples/issues" \
-  -H "Authorization: Bearer $TOKEN" -H "Content-Type: application/json" \
+  -H "Authorization: Bearer $GITCODE_TOKEN" -H "Content-Type: application/json" \
   -d '{"title": "标题", "body": "描述"}'
 
 # 关闭 / 重开 / 改标题
 curl -s -X PATCH "https://gitcode.com/api/v5/repos/cann/issues/{number}" \
-  -H "Authorization: Bearer $TOKEN" -H "Content-Type: application/json" \
+  -H "Authorization: Bearer $GITCODE_TOKEN" -H "Content-Type: application/json" \
   -d '{"state": "closed"}'
 
 # 评论
 curl -s -X POST "https://gitcode.com/api/v5/repos/cann/cann-samples/issues/{number}/comments" \
-  -H "Authorization: Bearer $TOKEN" -H "Content-Type: application/json" \
+  -H "Authorization: Bearer $GITCODE_TOKEN" -H "Content-Type: application/json" \
   -d '{"body": "评论内容"}'
 ```
 
