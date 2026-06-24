@@ -1,0 +1,43 @@
+name: cann-samples Issue Report
+
+# 手动触发：在仓库 Actions 页面点 "Run workflow"
+on:
+  workflow_dispatch:
+    inputs:
+      repo:
+        description: "GitCode 仓库 (owner/repo)"
+        required: false
+        default: "cann/cann-samples"
+
+permissions:
+  contents: write   # 允许把生成的报告 commit & push 回仓库
+
+jobs:
+  generate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.x"
+
+      - name: Generate issue report
+        id: gen
+        env:
+          GITCODE_TOKEN: ${{ secrets.GITCODE_TOKEN }}
+        run: python3 scripts/gen_issue_report.py "${{ inputs.repo }}"
+
+      - name: Commit & push report
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add cann-samples/issues/reports/
+          if git diff --cached --quiet; then
+            echo "No new report to commit."
+          else
+            git commit -m "Add issue report (${{ steps.gen.outputs.issue_count }} open issues)"
+            git push
+          fi
